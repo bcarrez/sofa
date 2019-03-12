@@ -27,6 +27,15 @@ namespace sofa
 namespace component
 {
 
+extern "C" {
+SOFAOPENCL_API void initExternalModule();
+SOFAOPENCL_API const char* getModuleName();
+SOFAOPENCL_API const char* getModuleVersion();
+SOFAOPENCL_API const char* getModuleLicense();
+SOFAOPENCL_API const char* getModuleDescription();
+SOFAOPENCL_API const char* getModuleComponentList();
+}
+
 void initExternalModule()
 {
     static bool first = true;

@@ -61,10 +61,10 @@ template class IdentityMapping< OpenCLVec3fTypes, OpenCLVec3dTypes>;
 template class IdentityMapping< OpenCLVec3dTypes, OpenCLVec3fTypes>;
 template class IdentityMapping< OpenCLVec3dTypes, OpenCLVec3dTypes>;
 template class IdentityMapping< OpenCLVec3dTypes, Vec3fTypes>;
-template class IdentityMapping< OpenCLVec3Types, Vec3Types>;
+//template class IdentityMapping< OpenCLVec3Types, Vec3Types>;
 
 template class IdentityMapping< Vec3fTypes, OpenCLVec3dTypes>;
-template class IdentityMapping< Vec3Types, OpenCLVec3Types>;
+//template class IdentityMapping< Vec3Types, OpenCLVec3Types>;
 
 
 template class IdentityMapping< OpenCLVec3d1Types, ExtVec3fTypes>;
