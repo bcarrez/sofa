@@ -1363,6 +1363,12 @@ void TetrahedronFEMForceField<DataTypes>::init()
         return;
     }
 
+    /// test poisson ratio value between 0 ansd 0.5
+    if (_poissonRatio.getValue()>=0.5)
+    {
+        msg_error() << "poisson ratio value " << _poissonRatio.getValue() << "invalid.";
+    }
+
     
     if (m_topology->getNbTetrahedra()<=0 && m_topology->getNbHexahedra()<=0)
     {

@@ -132,6 +132,67 @@ struct TetrahedronFEMForceField_test : public ForceField_test<_TetrahedronFEMFor
 
         EXPECT_EQ(fem->getComponentState(), ComponentState::Invalid) ;
     }
+
+    void checkPoissonRatio()
+    {
+        modeling::clearScene();
+
+        // This is a RAII message.
+        EXPECT_MSG_EMIT(Error) ;
+
+        std::stringstream scene ;
+        scene << R"(
+<?xml version="1.0" ?>
+<Node name="lroot" gravity="0 -9.81 0" dt="0.02">
+    <RequiredPlugin name="SofaOpenglVisual"/>
+    <RequiredPlugin name='SofaImplicitOdeSolver'/>
+    <RequiredPlugin name='SofaLoader'/>
+    <RequiredPlugin name='SofaGeneralSimpleFem'/>
+    <RequiredPlugin pluginName='SofaBoundaryCondition'/>
+    <RequiredPlugin pluginName='SofaGeneralLoader'/>
+
+    <DefaultPipeline name="CollisionPipeline" verbose="0" />
+    <BruteForceBroadPhase/>
+    <BVHNarrowPhase/>
+    <DefaultContactManager name="collision response" response="default" />
+    <DiscreteIntersection/>
+
+    <MeshObjLoader name="LiverSurface" filename="mesh/liver-smooth.obj" />
+
+    <Node name="Liver" gravity="0 -9.81 0">
+        <EulerImplicitSolver name="cg_odesolver"   rayleighStiffness="0.1" rayleighMass="0.1" />
+        <CGLinearSolver name="linear solver" iterations="25" tolerance="1e-09" threshold="1e-09" />
+        <MeshGmshLoader name="meshLoader" filename="mesh/liver.msh" />
+        <TetrahedronSetTopologyContainer name="topo" src="@meshLoader" />
+        <MechanicalObject name="dofs" src="@meshLoader" />
+        <TetrahedronSetGeometryAlgorithms template="Vec3d" name="GeomAlgo" />
+        <DiagonalMass  name="computed using mass density" massDensity="1" />
+        <TetrahedronFEMForceField template="Vec3d" name="FEM" method="large" poissonRatio="1.3" youngModulus="3000" computeGlobalMatrix="0" />
+        <FixedConstraint  name="FixedConstraint" indices="3 39 64" />
+        <Node name="Visu" tags="Visual" gravity="0 -9.81 0">
+            <OglModel  name="VisualModel" src="@../../LiverSurface" />
+            <BarycentricMapping name="visual mapping" input="@../dofs" output="@VisualModel" />
+        </Node>
+        <Node name="Surf" gravity="0 -9.81 0">
+            <SphereLoader filename="mesh/liver.sph" />
+            <MechanicalObject name="spheres" position="@[-1].position" />
+            <SphereCollisionModel name="CollisionModel" listRadius="@[-2].listRadius"/>
+            <BarycentricMapping name="sphere mapping" input="@../dofs" output="@spheres" />
+        </Node>
+    </Node>
+</Node>
+        )";
+
+        Node::SPtr root = SceneLoaderXML::loadFromMemory ("testscene",
+                                                          scene.str().c_str(),
+                                                          scene.str().size()) ;
+        root->init(sofa::core::execparams::defaultInstance()) ;
+
+//        BaseObject* fem = root->getTreeNode("FEMnode")->getObject("fem") ;
+//        EXPECT_NE(fem, nullptr) ;
+
+//        EXPECT_EQ(fem->getComponentState(), ComponentState::Invalid) ;
+    }
 };
 
 // ========= Define the list of types to instanciate.
@@ -166,6 +227,11 @@ TYPED_TEST( TetrahedronFEMForceField_test , extension )
 TYPED_TEST(TetrahedronFEMForceField_test, checkGracefullHandlingWhenTopologyIsMissing)
 {
     this->checkGracefullHandlingWhenTopologyIsMissing();
+}
+
+TYPED_TEST(TetrahedronFEMForceField_test, checkPoissonRatio)
+{
+    this->checkPoissonRatio();
 }
 
 } // namespace sofa
